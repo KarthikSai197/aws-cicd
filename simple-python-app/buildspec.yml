@@ -1,0 +1,27 @@
+version: 0.2
+env:
+  parameter-store:
+    DOCKER_USERNAME : cicd-docker-username
+    DOCKER_PASSWORD : cicd-docker-password
+    DOCKER_URL : cicd-docker-url
+
+phases:
+  install:
+    python : 3.11
+    
+  pre_build:
+     commands:
+      - echo "Pre-installing the dependecies"
+      - pip install -r simple-python-app/requirments.txt
+  build:
+    commands:
+       - cd simple-python-app
+       - echo "Building the image"
+       - docker build -t "$DOCKER_URL/$DOCKER_USERNAME/simple-python-app-latest" .
+       - echo "Logging into the Docker Website with Credentials provided in System Manager"
+       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "$DOCKER_URL"
+       - echo "Pushing the image"
+       - docker push "$DOCKER_URL/$DOCKER_USERNAME/simple-python-app-latest"
+  post_build:
+    commands:
+      - echo "Building an image completed Successfully. "
